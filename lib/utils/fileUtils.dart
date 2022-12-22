@@ -5,11 +5,15 @@ class FileUtils {
   static Future<List<String>> onWrite(
       String text, String urlData, String input) async {
     // Lấy path folder bookmart
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/bookmart.txt');
+    String fileName = "bookmart.txt";
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    String savePath = '$dir/$fileName';
+    final File file = File(savePath);
+    if (!(await File(savePath).exists())) {
+      await file.create();
+    }
     String textFileRead = await file.readAsString();
     List<String> listTextRaw = textFileRead.split("\n");
-    // print('${directory.path}/bookmart.txt');
     // remove element rỗng
     List<String> newList = [];
     for (var element in listTextRaw) {
