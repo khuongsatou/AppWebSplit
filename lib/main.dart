@@ -329,9 +329,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       height: _dy < size.height * 0.5 && isVisibleKeyBoard
                           ? getKeyboardHeight(context) +
                               73 // keyboard height + height container show
-                          : _dy < 73 // Đảm bảo phải có 1 container hiện
-                              ? 73.0
-                              : _dy,
+                          : _dy,
                       width: size.width,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
@@ -366,6 +364,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 setState(() {
                                   _dy = pixelOffset;
                                 });
+                                return;
+                              }
+                              if (pixelOffset <= 73) {
+                                setState(() {
+                                  _dy = 73.0;
+                                });
+                                return;
                               }
                             },
                             child: Row(
