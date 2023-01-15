@@ -25,7 +25,7 @@ class _DraweEndPageState extends State<DraweEndPage> {
     super.initState();
 
     try {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         onRead();
       });
     } catch (err) {
@@ -49,9 +49,8 @@ class _DraweEndPageState extends State<DraweEndPage> {
       final File file = File('${directory.path}/bookmart.txt');
       text = await file.readAsString();
     } catch (e) {
-      print("Couldn't read file");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Không mở được file")),
+        const SnackBar(content: Text("Không mở được file")),
       );
     }
     List<String> listTextRaw = text.split("\n");
@@ -118,62 +117,60 @@ class _DraweEndPageState extends State<DraweEndPage> {
           topRight: Radius.circular(8.0),
         ),
       ),
-      builder: (context) => Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 24.0),
-              child: Text(
-                'Xác nhận xóa!',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.blue),
-              ),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 24.0),
+            child: Text(
+              'Xác nhận xóa!',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blue),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Center(
-                        child: Text(
-                          'Hủy',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Center(
+                      child: Text(
+                        'Hủy',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),
                   ),
-                  Expanded(
-                    flex: 1,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        Future.delayed(const Duration(seconds: 1), () {
-                          onConfirmDelete(index);
-                        });
-                      },
-                      child: const Center(
-                        child: Text(
-                          'Xóa',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Future.delayed(const Duration(seconds: 1), () {
+                        onConfirmDelete(index);
+                      });
+                    },
+                    child: const Center(
+                      child: Text(
+                        'Xóa',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -192,51 +189,48 @@ class _DraweEndPageState extends State<DraweEndPage> {
       builder: (context) => Container(
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom),
-        child: Container(
-          // color: Colors.red,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                child: const Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: Text(
-                    'Trên',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.blue),
-                  ),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Future.delayed(const Duration(seconds: 1), () {
-                    widget.onLink(entries[index], KEYGLOBAL.top);
-                  });
-                },
-              ),
-              const Divider(color: Colors.black12),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Future.delayed(const Duration(seconds: 1), () {
-                    widget.onLink(entries[index], KEYGLOBAL.bottom);
-                  });
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'Dưới',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.blue),
-                  ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              child: const Padding(
+                padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: Text(
+                  'Trên',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.blue),
                 ),
               ),
-            ],
-          ),
+              onTap: () {
+                Navigator.of(context).pop();
+                Future.delayed(const Duration(seconds: 1), () {
+                  widget.onLink(entries[index], KEYGLOBAL.top);
+                });
+              },
+            ),
+            const Divider(color: Colors.black12),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+                Future.delayed(const Duration(seconds: 1), () {
+                  widget.onLink(entries[index], KEYGLOBAL.bottom);
+                });
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Dưới',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.blue),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -244,7 +238,6 @@ class _DraweEndPageState extends State<DraweEndPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Drawer(
       // Add a ListView to the drawer. This ensures the user can scroll
       // through the options in the drawer if there isn't enough vertical

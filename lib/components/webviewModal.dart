@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class WebViewAppPage extends StatefulWidget {
-  const WebViewAppPage(
+class WebViewAppModalPage extends StatefulWidget {
+  const WebViewAppModalPage(
       {Key? key,
       required this.title,
       required this.url,
@@ -18,10 +18,10 @@ class WebViewAppPage extends StatefulWidget {
   final Function onUpdateProgress;
 
   @override
-  State<WebViewAppPage> createState() => _WebViewAppPageState();
+  State<WebViewAppModalPage> createState() => _WebViewAppModalPageState();
 }
 
-class _WebViewAppPageState extends State<WebViewAppPage> {
+class _WebViewAppModalPageState extends State<WebViewAppModalPage> {
   @override
   void initState() {
     super.initState();

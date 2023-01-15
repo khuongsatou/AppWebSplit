@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_app/components/drawerEnd.dart';
 import 'package:my_app/components/linerProgress.dart';
 import 'package:my_app/components/search.dart';
+import 'package:my_app/components/webviewModal.dart';
 import 'package:my_app/constraints/keyGlobal.dart';
 import 'package:my_app/models/bookMart.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -60,18 +61,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   String textDefault = "";
   String url = "";
-  late bool isVisible;
-  late bool isVisibleModal;
-  late bool isVisibleKeyBoard;
+  bool isVisible = false;
+  bool isVisibleModal = false;
+  bool isVisibleKeyBoard = false;
   late String? tempDrawer = KEYGLOBAL.top;
-  late double _dy;
-  late double _keyBoardPadding = 300;
+  double _dy = 0.0;
 
   late StreamSubscription<bool> keyboardSubscription;
+  late bool isInitMain = false;
 
   @override
   void initState() {
     super.initState();
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Size sizeScreen = MediaQuery.of(context).size;
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _dy = sizeScreen.height * 0.5;
+        });
+      });
+      // ignore: empty_catches
+    } catch (err) {}
 
     _controllerTextEditing = TextEditingController();
     _controllerTextEditingModal = TextEditingController();
@@ -82,10 +95,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     )..addListener(() {
         if (_controllerAnimProgress.isCompleted) {
           Future.delayed(const Duration(seconds: 1), () {
+            if (!mounted) {
+              return;
+            }
             setState(() {
               isVisible = false;
             });
           });
+        }
+        if (!mounted) {
+          return;
         }
         setState(() {
           isVisible = true;
@@ -98,43 +117,49 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     )..addListener(() {
         if (_controllerAnimProgressModal.isCompleted) {
           Future.delayed(const Duration(seconds: 1), () {
+            if (!mounted) {
+              return;
+            }
             setState(() {
               isVisibleModal = false;
             });
           });
+        }
+        if (!mounted) {
+          return;
         }
         setState(() {
           isVisibleModal = true;
         });
       });
 
-    isVisible = false;
-    isVisibleModal = false;
-    isVisibleKeyBoard = false;
-
-    _dy = 0.0;
-
-    Future.delayed(Duration.zero, () {
-      Size sizeScreen = MediaQuery.of(context).size;
-      _dy = sizeScreen.height * 0.85;
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        isInitMain = true;
+      });
     });
 
     var keyboardVisibilityController = KeyboardVisibilityController();
-    // Query
-    // print(
-    //     'Keyboard visibility direct query: ${keyboardVisibilityController.isVisible}');
 
     // Subscribe
     keyboardSubscription =
         keyboardVisibilityController.onChange.listen((bool visible) {
       Future.delayed(const Duration(microseconds: 500), () {
-        // print('Keyboard visibility update. Is visible: $visible ');
+        if (!mounted) {
+          return;
+        }
         setState(() {
           isVisibleKeyBoard = visible;
-          _keyBoardPadding = 0;
         });
       });
     });
+  }
+
+  double getKeyboardHeight(BuildContext context) {
+    return MediaQuery.of(context).viewInsets.bottom;
   }
 
   void onSubmit(text, [String? key]) {
@@ -142,6 +167,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         KEYGLOBAL.checkAreaWeb(key) ? _controller : _controllerModal;
 
     control.future.then((value) {
+      if (!mounted) return;
       setState(() {
         value
             .loadUrl(url = text.toString())
@@ -157,18 +183,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     Completer<WebViewController> control =
         KEYGLOBAL.checkAreaWeb(key) ? _controller : _controllerModal;
     control.future.then((value) {
+      if (!mounted) return;
       setState(() {
         value.reload();
       });
     }).onError((error, stackTrace) {
       print("error:" + error.toString());
     });
-
-    // print("Reload");
   }
 
   void onList([String? key]) async {
     try {
+      if (!mounted) return;
       setState(() {
         tempDrawer = key;
         _scaffoldKey.currentState?.openEndDrawer();
@@ -195,11 +221,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Future<void> onLink(BookMart bookMart, [String? key]) async {
     // cần làm thêm trả về giá trị
-    // print(bookMart.url);
+
     Completer<WebViewController> control =
         KEYGLOBAL.checkAreaWeb(key) ? _controller : _controllerModal;
 
     control.future.then((value) {
+      if (!mounted) return;
       setState(() {
         value.loadUrl(url = bookMart.url.toString()).then((value) {
           if (KEYGLOBAL.checkAreaWeb(key)) {
@@ -227,7 +254,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _controllerAnimProgress.dispose();
     _controllerAnimProgressModal.dispose();
     keyboardSubscription.cancel();
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -235,35 +261,52 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     EdgeInsets sizeSafe = MediaQuery.of(context).padding;
-    double sizeKeyBoard = MediaQuery.of(context).viewInsets.bottom;
-    // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomInset: false,
       body: KeyboardVisibilityBuilder(
         builder: (context, isKeyboardVisible) {
           return Container(
+            width: size.width,
+            height: size.height,
             color: Colors.white,
-            child: Padding(
-              padding: EdgeInsets.only(top: sizeSafe.top),
-              child: SizedBox(
-                height: size.height,
-                width: size.width,
-                child: Stack(
-                  children: [
-                    Column(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
+                  width: size.width,
+                  height: size.width,
+                  color: Colors.white,
+                  child: const SizedBox.shrink(),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
                       children: [
-                        SearchPage(
-                          onSubmit: (t) => onSubmit(t, KEYGLOBAL.top),
-                          onReload: () => onReload(KEYGLOBAL.top),
-                          onList: () => onList(KEYGLOBAL.top),
-                          onBookMart: () => onBookMart(KEYGLOBAL.top),
-                          controllerTextEditing: _controllerTextEditing,
+                        Container(
+                          height: sizeSafe.top,
                         ),
-                        LineProgress(
-                            controller: _controllerAnimProgress,
-                            isVisible: isVisible),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: SearchPage(
+                            onSubmit: (t) => onSubmit(t, KEYGLOBAL.top),
+                            onReload: () => onReload(KEYGLOBAL.top),
+                            onList: () => onList(KEYGLOBAL.top),
+                            onBookMart: () => onBookMart(KEYGLOBAL.top),
+                            controllerTextEditing: _controllerTextEditing,
+                          ),
+                        ),
+                        isInitMain
+                            ? LineProgress(
+                                controller: _controllerAnimProgress,
+                                isVisible: isVisible)
+                            : SizedBox.shrink(),
                         Expanded(
-                          flex: 10,
                           child: WebViewAppPage(
                             url: url,
                             title: '',
@@ -274,99 +317,115 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                       ],
                     ),
-                    AnimatedPositioned(
-                      curve: Curves.decelerate,
-                      duration: const Duration(milliseconds: 100),
-                      top: isVisibleKeyBoard
-                          ? _keyBoardPadding + sizeSafe.top
-                          : _dy,
-                      child: Container(
-                        height: size.height + sizeSafe.bottom + sizeSafe.top,
-                        width: size.width,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
-                          boxShadow: const [
-                            // BoxShadow(blurRadius: 4.0),
-                            BoxShadow(
-                                color: Colors.white, offset: Offset(0, -2)),
-                            BoxShadow(
-                                color: Colors.white, offset: Offset(0, 2)),
-                            BoxShadow(
-                                color: Colors.black12,
-                                offset: Offset(0, -2),
-                                blurRadius: 4.0),
-                            BoxShadow(
-                                color: Colors.white, offset: Offset(-2, 2)),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () => print("hihi"),
-                              onPanUpdate: (details) {
-                                // value old + value y new. lên là - xuống là dương
-                                double pixelOffset = _dy + details.delta.dy;
-                                // nếu keyboard tắt thì ko cần về vị trí cũ
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.ease,
+                    child: Container(
+                      height: _dy < size.height * 0.5 && isVisibleKeyBoard
+                          ? getKeyboardHeight(context) +
+                              73 // keyboard height + height container show
+                          : _dy < 73 // Đảm bảo phải có 1 container hiện
+                              ? 73.0
+                              : _dy,
+                      width: size.width,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        boxShadow: const [
+                          // BoxShadow(blurRadius: 4.0),
+                          BoxShadow(color: Colors.white, offset: Offset(0, -2)),
+                          BoxShadow(color: Colors.white, offset: Offset(0, 2)),
+                          BoxShadow(
+                              color: Colors.black12,
+                              offset: Offset(0, -2),
+                              blurRadius: 4.0),
+                          BoxShadow(color: Colors.white, offset: Offset(-2, 2)),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          GestureDetector(
+                            onTap: () => print("hihi"),
+                            onPanUpdate: (details) {
+                              // value old + value y new. lên là - xuống là dương
+                              double pixelOffset = _dy - details.delta.dy;
+                              // nếu keyboard tắt thì ko cần về vị trí cũ
 
-                                if (pixelOffset >= 0 && pixelOffset < 750) {
-                                  setState(() {
-                                    _dy = pixelOffset;
-                                  });
+                              // if (pixelOffset >= 0 && pixelOffset < 750) {
+                              if (pixelOffset >= 80 &&
+                                  pixelOffset <= size.height * 0.95) {
+                                if (!mounted) {
+                                  return;
                                 }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
-                                ),
-                                height: 14,
-                                width: size.width,
-                                child: Center(
-                                  child: Container(
-                                    height: 4,
-                                    width: 40,
-                                    decoration: BoxDecoration(
-                                        color: Colors.black,
-                                        borderRadius: BorderRadius.circular(6)),
+                                setState(() {
+                                  _dy = pixelOffset;
+                                });
+                              }
+                            },
+                            child: Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    // color: Colors.red,
+                                  ),
+                                  height: 15,
+                                  width: size.width,
+                                  child: Center(
+                                    child: Container(
+                                      height: 4,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          borderRadius:
+                                              BorderRadius.circular(6)),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                            SizedBox(
-                              height: 50,
-                              width: size.width,
-                              child: SearchPage(
-                                onSubmit: (t) => onSubmit(t, KEYGLOBAL.bottom),
-                                onReload: () => onReload(KEYGLOBAL.bottom),
-                                onList: () => onList(KEYGLOBAL.bottom),
-                                onBookMart: () => onBookMart(KEYGLOBAL.bottom),
-                                controllerTextEditing:
-                                    _controllerTextEditingModal,
-                              ),
+                          ),
+                          Container(
+                            height: 50,
+                            width: size.width,
+                            // color: Colors.green,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: SearchPage(
+                              onSubmit: (t) => onSubmit(t, KEYGLOBAL.bottom),
+                              onReload: () => onReload(KEYGLOBAL.bottom),
+                              onList: () => onList(KEYGLOBAL.bottom),
+                              onBookMart: () => onBookMart(KEYGLOBAL.bottom),
+                              controllerTextEditing:
+                                  _controllerTextEditingModal,
                             ),
-                            LineProgress(
-                                controller: _controllerAnimProgressModal,
-                                isVisible: isVisibleModal),
-                            Container(
-                              constraints: BoxConstraints.expand(
-                                  width: size.width, height: size.height),
-                              child: WebViewAppPage(
-                                url: url,
-                                title: '',
-                                controller: _controllerModal,
-                                onUpdateProgress: (v) =>
-                                    onUpdateProgress(v, KEYGLOBAL.bottom),
-                              ),
+                          ),
+                          isInitMain
+                              ? LineProgress(
+                                  controller: _controllerAnimProgressModal,
+                                  isVisible: isVisibleModal)
+                              : const SizedBox.shrink(),
+                          Expanded(
+                            child: WebViewAppModalPage(
+                              url: url,
+                              title: '',
+                              controller: _controllerModal,
+                              onUpdateProgress: (v) =>
+                                  onUpdateProgress(v, KEYGLOBAL.bottom),
                             ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
-                    )
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+                )
+              ],
             ),
           );
         },

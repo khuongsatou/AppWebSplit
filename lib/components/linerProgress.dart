@@ -21,7 +21,7 @@ class _LineProgressState extends State<LineProgress> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Container(
+    return SizedBox(
       height: 8,
       width: size.width,
       child: Padding(
