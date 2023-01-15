@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   bool isVisibleModal = false;
   bool isVisibleKeyBoard = false;
   late String? tempDrawer = KEYGLOBAL.top;
-  double _dy = 0.0;
+  double _dy = 73.0;
 
   late StreamSubscription<bool> keyboardSubscription;
   late bool isInitMain = false;
@@ -329,7 +329,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       height: _dy < size.height * 0.5 && isVisibleKeyBoard
                           ? getKeyboardHeight(context) +
                               73 // keyboard height + height container show
-                          : _dy,
+                          : _dy <= 0
+                              ? _dy + 73
+                              : _dy,
                       width: size.width,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
@@ -366,12 +368,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 });
                                 return;
                               }
-                              if (pixelOffset <= 73) {
-                                setState(() {
-                                  _dy = 73.0;
-                                });
-                                return;
-                              }
+                              // if (pixelOffset <= 73) {
+                              //   setState(() {
+                              //     _dy = 73.0;
+                              //   });
+                              //   return;
+                              // }
                             },
                             child: Row(
                               children: [

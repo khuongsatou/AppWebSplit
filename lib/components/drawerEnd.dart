@@ -186,53 +186,70 @@ class _DraweEndPageState extends State<DraweEndPage> {
     showMaterialModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      builder: (context) => Container(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GestureDetector(
-              child: const Padding(
-                padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                child: Text(
-                  'Trên',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blue),
+      builder: (context) {
+        Size size = MediaQuery.of(context).size;
+        return Container(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                child: Container(
+                  height: 50,
+                  color: Colors.white,
+                  width: size.width,
+                  child: const Center(
+                    child: Text(
+                      'Trên',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue),
+                    ),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Future.delayed(const Duration(seconds: 1), () {
+                    widget.onLink(entries[index], KEYGLOBAL.top);
+                  });
+                },
+              ),
+              // const Divider(color: Colors.black12),
+              Container(width: size.width, height: 1, color: Colors.black12),
+              GestureDetector(
+                onTap: () {
+                  print("Hi");
+                  Navigator.of(context).pop();
+                  Future.delayed(const Duration(seconds: 1), () {
+                    widget.onLink(entries[index], KEYGLOBAL.bottom);
+                  });
+                },
+                child: Container(
+                  width: size.width,
+                  height: 50,
+                  color: Colors.white,
+                  child: const Center(
+                    child: Text(
+                      'Dưới',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              onTap: () {
-                Navigator.of(context).pop();
-                Future.delayed(const Duration(seconds: 1), () {
-                  widget.onLink(entries[index], KEYGLOBAL.top);
-                });
-              },
-            ),
-            const Divider(color: Colors.black12),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-                Future.delayed(const Duration(seconds: 1), () {
-                  widget.onLink(entries[index], KEYGLOBAL.bottom);
-                });
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Dưới',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blue),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+              // const Divider(color: Colors.black12),
+            ],
+          ),
+        );
+      },
     );
   }
 
